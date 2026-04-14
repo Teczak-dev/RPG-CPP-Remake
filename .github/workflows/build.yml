@@ -1,0 +1,122 @@
+name: Build
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build (${{ matrix.platform }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            platform: ubuntu
+            binary_path: build/rpg_cpp_remake
+          - os: macos-latest
+            platform: macos
+            binary_path: build/rpg_cpp_remake
+          - os: windows-latest
+            platform: windows
+            binary_path: build/Release/rpg_cpp_remake.exe
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install dependencies (Ubuntu)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake jq git build-essential pkg-config libasound2-dev libx11-dev libxrandr-dev libxi-dev libxcursor-dev libxinerama-dev libgl1-mesa-dev
+
+      - name: Build static raylib (Linux)
+        if: runner.os == 'Linux'
+        shell: bash
+        run: |
+          git clone --depth 1 https://github.com/raysan5/raylib.git /tmp/raylib
+          cmake -S /tmp/raylib -B /tmp/raylib/build \
+            -DBUILD_SHARED_LIBS=OFF \
+            -DBUILD_EXAMPLES=OFF \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_INSTALL_PREFIX="$GITHUB_WORKSPACE/raylib-static"
+          cmake --build /tmp/raylib/build --parallel
+          cmake --install /tmp/raylib/build
+
+      - name: Install dependencies (macOS)
+        if: runner.os == 'macOS'
+        run: brew install cmake jq raylib
+
+      - name: Install dependencies (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          choco install -y cmake jq
+          git clone https://github.com/microsoft/vcpkg.git "$env:GITHUB_WORKSPACE/vcpkg"
+          & "$env:GITHUB_WORKSPACE/vcpkg/bootstrap-vcpkg.bat"
+          & "$env:GITHUB_WORKSPACE/vcpkg/vcpkg.exe" install raylib:x64-windows
+
+      - name: Read version metadata
+        shell: bash
+        run: |
+          echo "VERSION=$(jq -r '.version' version.json)" >> "$GITHUB_ENV"
+          echo "BUILD_NUMBER=$(jq -r '.build_number' version.json)" >> "$GITHUB_ENV"
+
+      - name: Configure (Linux)
+        if: runner.os == 'Linux'
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH="$GITHUB_WORKSPACE/raylib-static"
+
+      - name: Configure (macOS)
+        if: runner.os == 'macOS'
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+
+      - name: Configure (Windows)
+        if: runner.os == 'Windows'
+        shell: bash
+        run: |
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_TOOLCHAIN_FILE="$GITHUB_WORKSPACE/vcpkg/scripts/buildsystems/vcpkg.cmake" \
+            -DVCPKG_TARGET_TRIPLET=x64-windows
+
+      - name: Build
+        run: cmake --build build --config Release --parallel
+
+      - name: Create release notes snippet
+        shell: bash
+        run: |
+          cat > release-notes-${{ matrix.platform }}.md <<'EOF'
+          ## Usage and installation notes (unsigned binaries)
+          
+          These binaries are not digitally signed to keep this open-source project free.
+          
+          ### macOS
+          If you see "unidentified developer" or "app is damaged":
+          1. Right-click the app and choose Open.
+          2. If needed, go to System Settings -> Privacy & Security and click Open Anyway.
+          
+          ### Windows
+          If SmartScreen appears:
+          1. Click More info.
+          2. Click Run anyway.
+          
+          ### Linux
+          Typical runtime dependencies for raylib:
+          - libasound2, libx11-6, libxrandr2, libxi6, libxcursor1, libxinerama1, libgl1
+          
+          Then:
+          ```bash
+          chmod +x ./rpg_cpp_remake
+          ./rpg_cpp_remake
+          ```
+          EOF
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: RPG CPP Remake-v${{ env.VERSION }}-${{ matrix.platform }}
+          path: |
+            ${{ matrix.binary_path }}
+            release-notes-${{ matrix.platform }}.md

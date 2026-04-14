@@ -1,0 +1,29 @@
+# CMake
+/build/
+/CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+compile_commands.json
+
+# IDE & Editors
+.vscode/
+.idea/
+.nvim/
+*.swp
+*.swo
+
+# OS generated
+.DS_Store
+Thumbs.db
+
+# Local cache
+.cache/
+
+# Binaries
+/bin/
+*.exe
+*.out
+*.app
+
+# Raylib specific (if downloaded locally)
+raylib/
