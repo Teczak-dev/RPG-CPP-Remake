@@ -1,4 +1,4 @@
-# 🎮 RPG CPP Remake
+# RPG CPP Remake
 
 **A story-driven 2D RPG built with C++17 + raylib, featuring a playable main campaign and a creator-friendly engine for building custom adventures.**
 
@@ -86,7 +86,7 @@ Run the executable:
 This is an open-source project, and distributed binaries are **not digitally signed** to keep the project free and accessible.  
 Because of that, your OS may show a security warning the first time you run the game.
 
-### 🍎 macOS (Apple Silicon / Intel)
+### macOS (Apple Silicon / Intel)
 
 If you see **"unidentified developer"** or **"app is damaged and can't be opened"**:
 
@@ -99,14 +99,14 @@ If the warning still appears:
 2. Find the blocked app message and click **Open Anyway**.
 3. Confirm launch.
 
-### 🪟 Windows
+### Windows
 
 If Windows SmartScreen blocks startup:
 
 1. Click **More info**.
 2. Click **Run anyway**.
 
-### 🐧 Linux
+### Linux
 
 Install common runtime dependencies for raylib-based games (package names may vary by distro):
 
