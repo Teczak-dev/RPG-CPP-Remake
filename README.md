@@ -46,8 +46,8 @@ This project combines a classic single-player RPG experience with extensible too
 Clone the repository and enter the project directory:
 
 ```bash
-git clone https://github.com/Teczak-dev/rpg-cpp-remake.git
-cd rpg-cpp-remake
+git clone https://github.com/Teczak-dev/RPG-CPP-Remake.git
+cd RPG-CPP-Remake
 ```
 
 Install required dependencies with Homebrew:
