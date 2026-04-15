@@ -2,7 +2,7 @@
 
 #include <string>
 
-int main() {
+static int RunGame() {
   const int screenWidth = 1280;
   const int screenHeight = 720;
 
@@ -107,3 +107,16 @@ int main() {
   CloseWindow();
   return 0;
 }
+
+int main() {
+  return RunGame();
+}
+
+#if defined(_WIN32)
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+
+int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
+  return RunGame();
+}
+#endif
