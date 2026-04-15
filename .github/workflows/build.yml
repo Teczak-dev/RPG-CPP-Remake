@@ -160,6 +160,9 @@ jobs:
     permissions:
       contents: write
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
       - name: Download build artifacts
         uses: actions/download-artifact@v4
         with:
@@ -171,7 +174,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: release-assets/*
-          generate_release_notes: true
+          body_path: .github/release-notes.md
 
   draft_release:
     name: Publish draft release
@@ -181,6 +184,9 @@ jobs:
     permissions:
       contents: write
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
       - name: Download build artifacts
         uses: actions/download-artifact@v4
         with:
@@ -191,10 +197,10 @@ jobs:
       - name: Create or update draft release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: draft-v${{ needs.metadata.outputs.version }}
+          tag_name: v${{ needs.metadata.outputs.version }}-preview
           target_commitish: ${{ github.sha }}
-          name: Draft v${{ needs.metadata.outputs.version }}
+          name: v${{ needs.metadata.outputs.version }} Preview
           draft: true
           prerelease: true
           files: release-assets/*
-          generate_release_notes: true
+          body_path: .github/release-notes.md

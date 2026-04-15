@@ -230,6 +230,7 @@ This project uses **GitHub Actions** for automated multi-platform builds on:
 
 The workflow reads `version.json`, builds with CMake, then uploads downloadable artifacts for each platform.
 When you push a tag like `v0.0.1`, it also creates a GitHub Release and attaches all platform packages automatically.
+Release body content is loaded from `.github/release-notes.md`, so you can edit one Markdown file before publishing.
 
 ---
 
