@@ -2,6 +2,10 @@ name: Build
 
 on:
   push:
+    tags:
+      - "v*"
+    branches:
+      - "**"
   pull_request:
   workflow_dispatch:
 
@@ -14,20 +18,23 @@ jobs:
       matrix:
         include:
           - os: ubuntu-latest
-            platform: ubuntu
+            platform: linux
             binary_path: build/rpg_cpp_remake
+            package_ext: tar.gz
           - os: macos-latest
             platform: macos
-            binary_path: build/rpg_cpp_remake
+            binary_path: build/rpg_cpp_remake.app
+            package_ext: zip
           - os: windows-latest
             platform: windows
             binary_path: build/Release/rpg_cpp_remake.exe
+            package_ext: zip
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Install dependencies (Ubuntu)
+      - name: Install dependencies (Linux)
         if: runner.os == 'Linux'
         run: |
           sudo apt-get update
@@ -63,7 +70,6 @@ jobs:
         shell: bash
         run: |
           echo "VERSION=$(jq -r '.version' version.json)" >> "$GITHUB_ENV"
-          echo "BUILD_NUMBER=$(jq -r '.build_number' version.json)" >> "$GITHUB_ENV"
 
       - name: Configure (Linux)
         if: runner.os == 'Linux'
@@ -87,36 +93,69 @@ jobs:
       - name: Create release notes snippet
         shell: bash
         run: |
-          cat > release-notes-${{ matrix.platform }}.md <<'EOF'
-          ## Usage and installation notes (unsigned binaries)
-          
-          These binaries are not digitally signed to keep this open-source project free.
-          
-          ### macOS
-          If you see "unidentified developer" or "app is damaged":
-          1. Right-click the app and choose Open.
-          2. If needed, go to System Settings -> Privacy & Security and click Open Anyway.
-          
-          ### Windows
-          If SmartScreen appears:
-          1. Click More info.
-          2. Click Run anyway.
-          
-          ### Linux
-          Typical runtime dependencies for raylib:
-          - libasound2, libx11-6, libxrandr2, libxi6, libxcursor1, libxinerama1, libgl1
-          
-          Then:
-          ```bash
-          chmod +x ./rpg_cpp_remake
-          ./rpg_cpp_remake
-          ```
+          cat > release-notes-${{ matrix.platform }}.txt <<'EOF'
+          Unsigned binary package for RPG CPP Remake.
+          macOS: open the .app bundle from Finder.
+          Windows: run rpg_cpp_remake.exe.
+          Linux: run ./rpg_cpp_remake after chmod +x if needed.
           EOF
+
+      - name: Package (Linux)
+        if: runner.os == 'Linux'
+        shell: bash
+        run: |
+          PACKAGE_ROOT="RPG-CPP-Remake-v${VERSION}-linux"
+          mkdir -p "dist/${PACKAGE_ROOT}"
+          cp "${{ matrix.binary_path }}" "dist/${PACKAGE_ROOT}/rpg_cpp_remake"
+          cp "release-notes-${{ matrix.platform }}.txt" "dist/${PACKAGE_ROOT}/README.txt"
+          tar -C dist -czf "dist/${PACKAGE_ROOT}.tar.gz" "${PACKAGE_ROOT}"
+          echo "PACKAGE_FILE=dist/${PACKAGE_ROOT}.tar.gz" >> "$GITHUB_ENV"
+
+      - name: Package (macOS)
+        if: runner.os == 'macOS'
+        shell: bash
+        run: |
+          PACKAGE_ROOT="RPG-CPP-Remake-v${VERSION}-macos"
+          mkdir -p "dist/${PACKAGE_ROOT}"
+          cp -R "${{ matrix.binary_path }}" "dist/${PACKAGE_ROOT}/rpg_cpp_remake.app"
+          cp "release-notes-${{ matrix.platform }}.txt" "dist/${PACKAGE_ROOT}/README.txt"
+          ditto -c -k --sequesterRsrc --keepParent "dist/${PACKAGE_ROOT}" "dist/${PACKAGE_ROOT}.zip"
+          echo "PACKAGE_FILE=dist/${PACKAGE_ROOT}.zip" >> "$GITHUB_ENV"
+
+      - name: Package (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $packageRoot = "RPG-CPP-Remake-v$env:VERSION-windows"
+          New-Item -ItemType Directory -Path "dist/$packageRoot" -Force | Out-Null
+          Copy-Item "${{ matrix.binary_path }}" "dist/$packageRoot/rpg_cpp_remake.exe"
+          Copy-Item "release-notes-${{ matrix.platform }}.txt" "dist/$packageRoot/README.txt"
+          Compress-Archive -Path "dist/$packageRoot" -DestinationPath "dist/$packageRoot.zip" -Force
+          "PACKAGE_FILE=dist/$packageRoot.zip" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: RPG CPP Remake-v${{ env.VERSION }}-${{ matrix.platform }}
-          path: |
-            ${{ matrix.binary_path }}
-            release-notes-${{ matrix.platform }}.md
+          name: RPG-CPP-Remake-v${{ env.VERSION }}-${{ matrix.platform }}
+          path: ${{ env.PACKAGE_FILE }}
+
+  release:
+    name: Publish release
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: release-assets
+          pattern: RPG-CPP-Remake-v*
+          merge-multiple: true
+
+      - name: Create GitHub release with assets
+        uses: softprops/action-gh-release@v2
+        with:
+          files: release-assets/*
+          generate_release_notes: true

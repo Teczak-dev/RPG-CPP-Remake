@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="27.661394mm"
+   height="27.661396mm"
+   viewBox="0 0 27.661394 27.661396"
+   version="1.1"
+   id="svg1"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs1" />
+  <g
+     id="layer1"
+     transform="translate(-62.849684,-81.00429)">
+    <rect
+       style="fill:#000080;stroke-width:157.226;paint-order:stroke fill markers"
+       id="rect1"
+       width="27.661388"
+       height="27.661388"
+       x="62.849686"
+       y="81.004288" />
+    <text
+       xml:space="preserve"
+       style="font-weight:500;font-size:12.9677px;font-family:'JetBrainsMono Nerd Font Mono';-inkscape-font-specification:'JetBrainsMono Nerd Font Mono Medium';text-align:start;writing-mode:lr-tb;direction:ltr;text-anchor:start;fill:#ffffff;stroke-width:385.295;paint-order:stroke fill markers"
+       x="64.379852"
+       y="99.184654"
+       id="text1"><tspan
+         id="tspan1"
+         style="stroke-width:385.295"
+         x="64.379852"
+         y="99.184654">RPG</tspan></text>
+  </g>
+</svg>

@@ -79,6 +79,74 @@ Run the executable:
 ./build/rpg_cpp_remake
 ```
 
+On macOS, CMake now builds an app bundle:
+
+```bash
+open ./build/rpg_cpp_remake.app
+```
+
+---
+
+## ▶️ Local Run Scripts
+
+Quick start scripts are available in `scripts/`:
+
+- macOS: `./scripts/run_macos.sh`
+- Linux: `./scripts/run_linux.sh`
+- Windows (Git Bash): `./scripts/run_windows.sh`
+
+Use:
+
+```bash
+chmod +x ./scripts/run_macos.sh ./scripts/run_linux.sh ./scripts/run_windows.sh
+```
+
+Then run the script for your platform.
+
+---
+
+## 🖼️ App Icon Configuration
+
+You can set platform icons without changing source code:
+
+- macOS bundle icon (`.icns`): `assets/icons/app.icns`
+- Windows executable icon (`.ico`): `assets/icons/app.ico`
+
+If needed, override icon paths at configure time:
+
+```bash
+cmake -S . -B build \
+  -DAPP_ICON_MACOS=/absolute/path/to/app.icns \
+  -DAPP_ICON_WINDOWS=/absolute/path/to/app.ico
+```
+
+Generate both icon files from a single source image:
+
+1. Put one source file (`.svg`, `.png`, `.jpg`, `.jpeg`, or `.webp`) in:
+   - `assets/icon-source/`
+2. Run:
+
+```bash
+chmod +x ./scripts/generate_icons.sh
+./scripts/generate_icons.sh
+```
+
+Or pass an explicit source path:
+
+```bash
+./scripts/generate_icons.sh /absolute/path/to/logo.svg
+```
+
+Output:
+- `assets/icons/app.icns`
+- `assets/icons/app.ico`
+
+Dependencies for icon generation on macOS:
+
+```bash
+brew install imagemagick librsvg
+```
+
 ---
 
 ## 📦 Usage and Installation Guide
@@ -142,6 +210,7 @@ chmod +x ./rpg_cpp_remake
 ├── include/       # Public headers and shared interfaces
 ├── assets/        # Sprites, tilesets, audio, and other game resources
 ├── scenarios/     # Story data, maps, events, and custom scenario definitions
+├── scripts/       # Utility scripts (run/build/icons)
 ├── .github/       # GitHub Actions workflows
 ├── version.json   # Project metadata (version/build/author/license)
 ├── LICENSE        # MIT-style license + required author attribution
@@ -153,13 +222,14 @@ chmod +x ./rpg_cpp_remake
 
 ## ⚙️ CI/CD
 
-This project uses **GitHub Actions** for automated multi-platform Release builds on:
+This project uses **GitHub Actions** for automated multi-platform builds on:
 
-- macOS
+- macOS (`.app` bundle packed as `.zip`)
 - Ubuntu
-- Windows
+- Windows (`.exe` packed as `.zip`)
 
-The workflow reads project version metadata from `version.json` using `jq`, builds the game with CMake, and publishes binaries as versioned artifacts per platform.
+The workflow reads `version.json`, builds with CMake, then uploads downloadable artifacts for each platform.
+When you push a tag like `v0.0.1`, it also creates a GitHub Release and attaches all platform packages automatically.
 
 ---
 
