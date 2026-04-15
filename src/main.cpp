@@ -113,10 +113,7 @@ int main() {
 }
 
 #if defined(_WIN32)
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
-
-int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
+extern "C" int __stdcall WinMain(void *, void *, char *, int) {
   return RunGame();
 }
 #endif
