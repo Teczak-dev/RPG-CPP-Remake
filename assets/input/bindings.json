@@ -1,0 +1,26 @@
+{
+  "bindings": [
+    {
+      "type": "action",
+      "id": "pause",
+      "keys": ["ESCAPE"],
+      "gamepadButtons": ["START", "MIDDLE_LEFT"]
+    },
+    {
+      "type": "axis",
+      "id": "move_x",
+      "negativeKeys": ["A", "LEFT"],
+      "positiveKeys": ["D", "RIGHT"],
+      "gamepadAxis": "LEFT_X",
+      "deadZone": 0.18
+    },
+    {
+      "type": "axis",
+      "id": "move_y",
+      "negativeKeys": ["W", "UP"],
+      "positiveKeys": ["S", "DOWN"],
+      "gamepadAxis": "LEFT_Y",
+      "deadZone": 0.18
+    }
+  ]
+}

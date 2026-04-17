@@ -12,13 +12,24 @@ set(APP_ICON_MACOS "${CMAKE_SOURCE_DIR}/assets/icons/app.icns" CACHE FILEPATH "P
 set(APP_ICON_WINDOWS "${CMAKE_SOURCE_DIR}/assets/icons/app.ico" CACHE FILEPATH "Path to Windows .ico app icon")
 set(APP_BUNDLE_IDENTIFIER "com.rpgcpp.remake" CACHE STRING "macOS bundle identifier")
 
+set(PROJECT_SOURCES
+    src/main.cpp
+    src/core/InputBindings.cpp
+    src/core/TimeController.cpp
+    src/game/GameApp.cpp
+    src/game/Player.cpp
+    src/ui/Widgets.cpp
+)
+
 if(APPLE)
-    add_executable(${PROJECT_TARGET} MACOSX_BUNDLE src/main.cpp)
+    add_executable(${PROJECT_TARGET} MACOSX_BUNDLE ${PROJECT_SOURCES})
 elseif(WIN32)
-    add_executable(${PROJECT_TARGET} WIN32 src/main.cpp)
+    add_executable(${PROJECT_TARGET} WIN32 ${PROJECT_SOURCES})
 else()
-    add_executable(${PROJECT_TARGET} src/main.cpp)
+    add_executable(${PROJECT_TARGET} ${PROJECT_SOURCES})
 endif()
+
+target_include_directories(${PROJECT_TARGET} PRIVATE "${CMAKE_SOURCE_DIR}/src")
 
 if(APPLE)
     if(EXISTS "${APP_ICON_MACOS}")
